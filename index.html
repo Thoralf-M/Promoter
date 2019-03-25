@@ -317,7 +317,7 @@ return new Promise(function(resolve, reject) {
 </div>
 <div class="second">
   <input type="button" class="button promote" value="Promote" onclick="promote()" />
-  <input type="button" class="button reattach" value="Reattach" onclick="reattach()" />
+  <input type="button" class="button reattach" value="Reattach and promote" onclick="reattach()" />
 </div>
 <div id="third">
   <input type="button" class="button2 nodebuton advanced" value="Advanced options" onclick="advancedoptions()" />
@@ -436,16 +436,7 @@ async function confirmedstatus(){
   }
 }
 
-
-async function promote(){
-  let amount = 6
-  let txhash = document.getElementById('input').value
-  let tails  = await getTailTxs(txhash)
-  .catch(err=>console.log(err))
-  isConfirmed(tails)
-  var tips, attachedTrytes
-  txhash = tails[0]
-  async function send(){
+async function send(txhash, amount){
     if(confirmed == true){
       return
     }
@@ -468,8 +459,17 @@ async function promote(){
     } catch(e) {
         console.log(e)
     } 
-  }
-  send()
+}
+
+async function promote(){
+  let amount = 6
+  let txhash = document.getElementById('input').value
+  let tails  = await getTailTxs(txhash)
+  .catch(err=>console.log(err))
+  isConfirmed(tails)
+  var tips, attachedTrytes
+  txhash = tails[0]
+  send(txhash, amount)
 }
 
 async function reattach() {
@@ -477,14 +477,17 @@ async function reattach() {
   let tails  = await getTailTxs(txhash)
   .catch(err=>console.log(err))
   isConfirmed(tails)
-  if(confirmed == true){
-      return
-    }
-    iota.replayBundle(tails[0], 3, 14)
+  if (confirmed == true) {
+    return
+  }
+  iota.replayBundle(tails[0], 3, 14)
     .then(replayedBundle => {
-      console.log(replayedBundle[0].hash)
-      addtxelement(replayedBundle[0].hash)
-      document.getElementById('input').value =  replayedBundle[0].hash
+      let replayhash = replayedBundle[0].hash
+      console.log(replayhash)
+      addtxelement(replayhash)
+      document.getElementById('input').value = replayhash
+      send(replayhash, 4)
+      return replayedBundle
     })
     .catch(err => console.log(err))
 }
