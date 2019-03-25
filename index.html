@@ -472,7 +472,7 @@ async function send(txhash, amount) {
   }
 
 async function promote(){
-  let amount = 6
+  let amount = 10
   let txhash = document.getElementById('input').value
   let tails  = await getTailTxs(txhash)
   .catch(err=>console.log(err))
@@ -541,7 +541,7 @@ async function reattach() {
       addtxelement(replayhash)
       document.getElementById('input').value = replayhash
       console.log('Replayed transaction: https://thetangle.org/transaction/'+replayhash)
-  send(replayhash, 6)
+  send(replayhash, 10)
 }
 
 function bundle(tailhash) {
