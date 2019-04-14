@@ -535,7 +535,13 @@ async function reattach() {
     let tips       = await iota.getTransactionsToApprove(3)
     attachedTrytes = await iota.attachToTangle(tips.trunkTransaction, tips.branchTransaction, 14, changedbundle)
   } else {
-    attachedTrytes = await iota.attachToTangle('9'.repeat(81), '9'.repeat(81), 14, changedbundle)
+    let nodeInfo
+        await iota.getNodeInfo()
+          .then(info => nodeInfo = info)
+          .catch(error => {
+            console.log(`Request error: ${error.message}`)
+          })
+    attachedTrytes = await iota.attachToTangle(nodeInfo.latestMilestone, nodeInfo.latestMilestone, 14, changedbundle)
   }
                      await iota.storeAndBroadcast(attachedTrytes)
   let replayhash = transaction_converter.asTransactionObject(attachedTrytes[0]).hash
