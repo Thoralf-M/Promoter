@@ -325,7 +325,7 @@ return new Promise(function(resolve, reject) {
   <textarea id="nodearea" spellcheck="false" placeholder="https://nodes.thetangle.org:443"></textarea>
   <input type="button" class="button2 nodebuton" value="Change node" onclick="changeNode()" />
   <input type="button" class="button2 pow" id="pow" value="Use local PoW" onclick="localPoW()" />
-  <input type="button" class="button2" id="network" value="Ignore tipselection" onclick="badnetwork=!badnetwork" />
+  <input type="button" class="button2" id="tipsel" value="Ignore tipselection" onclick="changeTipselection()" />
   </div>
 </div>
 <div id="fourth">
@@ -348,6 +348,17 @@ function advancedoptions(){
     e.style.visibility='hidden';
     e.style.display='none'
   }
+}
+
+function changeTipselection(){
+  ignoreTipselection=!ignoreTipselection
+  let el = document.getElementById('tipsel')
+  if(ignoreTipselection == true){
+    el.value = 'Use tipselection'
+  } else {
+    el.value = 'Ignore tipselection'
+  }
+  
 }
 
 function addtxelement(txhash) {
@@ -443,7 +454,7 @@ async function send(txhash, amount) {
     }
     try {
       let trytes = await iota.prepareTransfers('9'.repeat(81), transfers)
-      if (badnetwork == false) {
+      if (ignoreTipselection == false) {
         if (amount % 2 == 0) {
           tips = await iota.getTransactionsToApprove(3)
           attachedTrytes = await iota.attachToTangle(txhash, tips.branchTransaction, 14, trytes)
@@ -531,7 +542,7 @@ async function reattach() {
     return
   }
   let attachedTrytes
-  if(badnetwork == false){
+  if(ignoreTipselection == false){
     let tips       = await iota.getTransactionsToApprove(3)
     attachedTrytes = await iota.attachToTangle(tips.trunkTransaction, tips.branchTransaction, 14, changedbundle)
   } else {
@@ -575,7 +586,7 @@ var iota = core.composeAPI({
 var seed= '9'.repeat(81)
 var transfers = [{value: 0, address: 'PROMOTETRANSACTION9PROMOTER9BY9THORALF9PROMOTETRANSACTION9PROMOTER9BY9THORALF9999', tag:'PROMOTETRANSACTION9THORALF', message: converter.asciiToTrytes('https://thoralf-m.github.io/Promoter')}]
 var confirmed = false
-var badnetwork = false
+var ignoreTipselection = false
 
 
 </script>
