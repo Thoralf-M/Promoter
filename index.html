@@ -549,15 +549,16 @@ async function reattach() {
   //change trytes
   changedbundle = await bundletrytes.map(element => {
     element = transaction_converter.asTransactionTrytes(element)
-    tag = tag + '9'.repeat(27)
-    tag = tag.slice(0, 27)
+    // tag = tag + '9'.repeat(27)
+    // tag = tag.slice(0, 27)
     nonce = nonce + '9'.repeat(27)
     nonce = nonce.slice(0, 27)
-    if (element.slice(2000, 2187) >= 0) {
-      message = message + '9'.repeat(2178)
-      element = message.slice(0, 2187) + element.slice(2187, 2673)
-    }
-    element = element.slice(0, 2592) + tag + element.slice(2619, 2646) + nonce
+    // if (element.slice(2000, 2187) >= 0) {
+    //   message = message + '9'.repeat(2178)
+    //   element = message.slice(0, 2187) + element.slice(2187, 2673)
+    // }
+    // element = element.slice(0, 2592) + tag + element.slice(2619, 2646) + nonce
+    element = element.slice(0, 2646) + nonce
     return element
   })
   changedbundle = changedbundle.reverse()
