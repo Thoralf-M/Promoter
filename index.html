@@ -244,6 +244,21 @@ return new Promise(function(resolve, reject) {
   .button2:active {
     background:rgba(209, 233, 241, 0.658);
   }
+  .button3{
+    margin-left: 1rem;
+    color:white;
+    padding-left:1.5rem;
+    padding-right:1.5rem;
+    padding-top: 1rem;
+    padding-bottom:1rem;
+    border-radius:4px;
+    border:none;
+    transition: .25s;
+    box-shadow:0 0 1rem#000;
+    outline:0;
+    font-size: 14px;
+    background: rgba(255, 56, 30, 0.438);
+  }
   #fourth{
     margin-top:25px;
     margin-bottom:25px;
@@ -329,7 +344,9 @@ return new Promise(function(resolve, reject) {
   </div>
 </div>
 <div id="fourth">
-  <div class="fill-div">Transactions:</div>
+  <div class="fill-div">Transactions:
+    <input type="button" class="button3" id="clear" value="Clear txs" onclick="clearTxs()" />
+  </div>
 </div>
 
 
@@ -350,6 +367,10 @@ function advancedoptions(){
   }
 }
 
+function clearTxs(){
+  document.getElementById('fourth').innerHTML = '<div class=\"fill-div\">Transactions:\r\n    <input type=\"button\" class=\"button3\" id=\"clear\" value=\"Clear txs\" onclick=\"clearTxs()\" \/>\r\n  <\/div>'
+}
+
 function changeTipselection(){
   ignoreTipselection=!ignoreTipselection
   let el = document.getElementById('tipsel')
@@ -358,7 +379,6 @@ function changeTipselection(){
   } else {
     el.value = 'Ignore tipselection'
   }
-  
 }
 
 function addtxelement(txhash) {
@@ -469,6 +489,9 @@ async function send(txhash, amount) {
             console.log(`Request error: ${error.message}`)
           })
         attachedTrytes = await iota.attachToTangle(txhash, nodeInfo.latestMilestone, 14, trytes)
+        if(amount == 5){
+          changeTipselection()
+        }
       }
       await iota.storeAndBroadcast(attachedTrytes)
       txhash = transaction_converter.asTransactionObject(attachedTrytes[0]).hash
@@ -484,7 +507,7 @@ async function send(txhash, amount) {
   }
 
 async function promote(){
-  let amount = 10
+  let amount = 6
   let txhash = document.getElementById('input').value
   let tails  = await getTailTxs(txhash)
   .catch(err=>console.log(err))
@@ -559,7 +582,7 @@ async function reattach() {
       addtxelement(replayhash)
       document.getElementById('input').value = replayhash
       console.log('Replayed transaction: https://thetangle.org/transaction/'+replayhash)
-  send(replayhash, 10)
+  send(replayhash, 6)
 }
 
 function bundle(tailhash) {
