@@ -494,8 +494,9 @@ async function send(txhash, amount) {
         }
       }
       await iota.storeAndBroadcast(attachedTrytes)
-      txhash = transaction_converter.asTransactionObject(attachedTrytes[0]).hash
-      console.log('Promotetransaction: https://thetangle.org/transaction/' + txhash)
+      // txhash = transaction_converter.asTransactionObject(attachedTrytes[0]).hash
+      // console.log('Promotetransaction: https://thetangle.org/transaction/' + txhash)
+      console.log('Promotetransaction: https://thetangle.org/transaction/' + transaction_converter.asTransactionObject(attachedTrytes[0]).hash)
       addtxelement(txhash)
       amount--
       if (amount > 0) {
