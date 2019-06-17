@@ -340,7 +340,7 @@ return new Promise(function(resolve, reject) {
   <textarea id="nodearea" spellcheck="false" placeholder="https://nodes.thetangle.org:443"></textarea>
   <input type="button" class="button2 nodebuton" value="Change node" onclick="changeNode()" />
   <input type="button" class="button2 pow" id="pow" value="Use local PoW" onclick="localPoW()" />
-  <input type="button" class="button2" id="tipsel" value="Ignore tipselection" onclick="changeTipselection()" />
+  <input type="button" class="button2" id="tipsel" value="Use tipselection" onclick="changeTipselection()" />
   </div>
 </div>
 <div id="fourth">
@@ -542,7 +542,7 @@ async function reattach() {
   let txhash  = document.getElementById('input').value
   let tails   = await getTailTxs(txhash)
   let message = converter.asciiToTrytes('Reattached by https://thoralf-m.github.io/Promoter')
-  let tag     = 'THORALF9PROMOTER9BY9THORALF'
+  // let tag     = 'PROMOTETRANSACTION9THORALF'
   let nonce   = 'THORALF9PROMOTER9BY9THORALF'
   let changedbundle = []
   let bundletrytes = await bundle(tails[0])
@@ -600,10 +600,7 @@ function bundle(tailhash) {
 }
 
 
-
-
 document.getElementById('input').oninput = function(){confirmedstatus()}
-
 
 var iota = core.composeAPI({
   provider: 'https://nodes.thetangle.org:443'
@@ -611,8 +608,7 @@ var iota = core.composeAPI({
 var seed= '9'.repeat(81)
 var transfers = [{value: 0, address: 'PROMOTETRANSACTION9PROMOTER9BY9THORALF9PROMOTETRANSACTION9PROMOTER9BY9THORALF9999', tag:'PROMOTETRANSACTION9THORALF', message: converter.asciiToTrytes('https://thoralf-m.github.io/Promoter')}]
 var confirmed = false
-var ignoreTipselection = false
-
+var ignoreTipselection = true
 
 </script>
 </body>
