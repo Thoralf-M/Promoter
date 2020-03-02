@@ -189,6 +189,10 @@ return new Promise(function(resolve, reject) {
   .button:active {
     background:rgba(173, 216, 230, 0.438);
   }
+  #selectedNode{
+    margin-top: 14px;
+    font-size: 20px;
+  }
   #third{
     margin-top:25px;
     word-break: break-word;
@@ -334,11 +338,19 @@ return new Promise(function(resolve, reject) {
   <input type="button" class="button promote" value="Promote" onclick="promote()" />
   <input type="button" class="button reattach" value="Reattach and promote" onclick="reattach()" />
 </div>
+<div id="selectedNode">Selected node: </div>
 <div id="third">
   <input type="button" class="button2 nodebuton advanced" value="Advanced options" onclick="advancedoptions()" />
   <div id="thirdoptions">
-  <textarea id="nodearea" spellcheck="false" placeholder="https://nodes.thetangle.org:443"></textarea>
-  <input type="button" class="button2 nodebuton" value="Change node" onclick="changeNode()" />
+  <input list="nodes" id="nodearea" spellcheck="false" onchange="changeNode()" placeholder="https://nodes.thetangle.org:443"></textarea>
+  <datalist id="nodes">
+    <option value="https://nodes.thetangle.org:443">
+    <option value="https://node01.iotatoken.nl:443">
+    <option value="https://perma.iota.partners">
+    <option value="https://nodes.devnet.thetangle.org:443">
+    <option value="https://nodes.devnet.iota.org:443">
+  </datalist>
+  <!-- <input type="button" class="button2 nodebuton" value="Change node" onclick="changeNode()" /> -->
   <input type="button" class="button2 pow" id="pow" value="Use local PoW" onclick="localPoW()" />
   <input type="button" class="button2" id="tipsel" value="Use tipselection" onclick="changeTipselection()" />
   </div>
@@ -355,7 +367,7 @@ return new Promise(function(resolve, reject) {
 </div>
 <script>
 function advancedoptions(){
-  document.getElementById('nodearea').value = 'https://perma.iota.partners'
+  // document.getElementById('nodearea').value = 'https://perma.iota.partners'
   let e = document.getElementById('thirdoptions')
   let style = getComputedStyle(e)
   if(style.visibility=='hidden'){
@@ -383,7 +395,11 @@ function changeTipselection(){
 
 function addtxelement(txhash) {
   var txelement = document.createElement("tx");
-  txelement.innerHTML = '<a href="https://thetangle.org/transaction/' + txhash + '" target="_blank" rel="noopener noreferrer">' + '<div class="fill-div">'+ txhash + "</div>"
+  if(network == 'Mainnet'){
+    txelement.innerHTML = '<a href="https://thetangle.org/transaction/' + txhash + '" target="_blank" rel="noopener noreferrer">' + '<div class="fill-div">'+ txhash + "</div>"
+  }else{
+    txelement.innerHTML = '<a href="https://devnet.thetangle.org/transaction/' + txhash + '" target="_blank" rel="noopener noreferrer">' + '<div class="fill-div">'+ txhash + "</div>"
+  }
   document.getElementById("fourth").append(txelement);
 }
 
@@ -400,20 +416,42 @@ function localPoW(){
       console.error("Error", err);
     }
   } else {
+    document.getElementById('nodearea').value = node
     changeNode()
     powbutton.value = 'Use local PoW'
   }
 }
 
-function changeNode(){
+async function changeNode(){
+  try{
   let nodeurl = document.getElementById('nodearea').value
-  var node = 'https://nodes.thetangle.org:443'
+  let oldNode = node
   if(nodeurl!='undefined'){
     node = nodeurl
   }
   iota = core.composeAPI({
     provider: node
   })
+  let nodeInfo = await iota.getNodeInfo().catch(e=>{
+    node = oldNode
+    console.error("Error changing node, switchting back to ", node)
+    iota = core.composeAPI({
+    provider: node
+  })
+  })
+  if(typeof nodeInfo != 'undefined'){
+    console.log("Nodeinfo new node:", nodeInfo)
+    document.getElementById("selectedNode").innerHTML = "Selected node: "+ node
+  }
+  confirmedstatus()
+  let getNetwork = nodeInfo.features.indexOf('testnet')
+  if(getNetwork != -1){
+    network = 'Devnet'
+  } else {
+    network = 'Mainnet'
+  }
+  } catch(e){
+  }
 }
 
 async function getTailTxs(txhash){
@@ -433,11 +471,13 @@ async function getTailTxs(txhash){
       tailobjects.push(bundleObjects[index])
     }
   }
-  console.log(tailobjects);
+  // console.log(tailobjects);
   tailobjects.sort((a, b) => (a.attachmentTimestamp < b.attachmentTimestamp) ? 1 : -1)
-  console.log(tailobjects);
+  // console.log(tailobjects);
   tails = tailobjects.map(e => e.hash)
-  console.log(tails);
+  if(tails[0] != '9'.repeat(81)){
+    console.log("Tail txs:",tails);
+  }
   return tails
 }
 
@@ -457,14 +497,20 @@ async function isConfirmed(tails){
 
 async function confirmedstatus(){
   let txhash = document.getElementById('input').value
+  if(typeof txhash != 'undefined'){
   let tails  = await getTailTxs(txhash)
   .catch(err=>console.log(err))
+  if(tails.length == 1 && tails[0] == '9'.repeat(81)){
+    console.log("Tx not known")
+  } else {
   for(let c=0; c<1000; c++){
     if(confirmed == true){
       return
     }
     isConfirmed(tails)
     await new Promise(resolve => setTimeout(resolve, 15000))
+  }
+  }
   }
 }
 
@@ -489,14 +535,19 @@ async function send(txhash, amount) {
             console.log(`Request error: ${error.message}`)
           })
         attachedTrytes = await iota.attachToTangle(txhash, nodeInfo.latestMilestone, 14, trytes)
-        if(amount == 5){
-          changeTipselection()
-        }
+        //switch to normal tipselection
+        // if(amount == 5){
+        //   changeTipselection()
+        // }
       }
       await iota.storeAndBroadcast(attachedTrytes)
       // txhash = transaction_converter.asTransactionObject(attachedTrytes[0]).hash
       // console.log('Promotetransaction: https://thetangle.org/transaction/' + txhash)
+      if(network == 'Mainnet'){
       console.log('Promotetransaction: https://thetangle.org/transaction/' + transaction_converter.asTransactionObject(attachedTrytes[0]).hash)
+      } else {
+      console.log('Promotetransaction: https://devnet.thetangle.org/transaction/' + transaction_converter.asTransactionObject(attachedTrytes[0]).hash)
+      }
       addtxelement(transaction_converter.asTransactionObject(attachedTrytes[0]).hash)
       amount--
       if (amount > 0) {
@@ -583,8 +634,12 @@ async function reattach() {
   let replayhash = transaction_converter.asTransactionObject(attachedTrytes[0]).hash
       addtxelement(replayhash)
       document.getElementById('input').value = replayhash
-      console.log('Replayed transaction: https://thetangle.org/transaction/'+replayhash)
-  send(replayhash, 6)
+      if(network == 'Mainnet'){
+      console.log('Reattached transaction: https://thetangle.org/transaction/'+replayhash)
+      } else {
+      console.log('Reattached transaction: https://devnet.thetangle.org/transaction/'+replayhash)
+      }
+  send(replayhash, 3)
 }
 
 function bundle(tailhash) {
@@ -602,9 +657,12 @@ function bundle(tailhash) {
 
 document.getElementById('input').oninput = function(){confirmedstatus()}
 
+var node = 'https://nodes.thetangle.org:443'
+document.getElementById("selectedNode").innerHTML = "Selected node: "+ node
 var iota = core.composeAPI({
-  provider: 'https://nodes.thetangle.org:443'
+  provider: node
 })
+var network = 'Mainnet'
 var seed= '9'.repeat(81)
 var transfers = [{value: 0, address: 'PROMOTETRANSACTION9PROMOTER9BY9THORALF9PROMOTETRANSACTION9PROMOTER9BY9THORALF9999', tag:'PROMOTETRANSACTION9THORALF', message: converter.asciiToTrytes('https://thoralf-m.github.io/Promoter')}]
 var confirmed = false
