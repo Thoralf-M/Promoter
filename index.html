@@ -443,7 +443,9 @@ async function changeNode(){
     console.log("Nodeinfo new node:", nodeInfo)
     document.getElementById("selectedNode").innerHTML = "Selected node: "+ node
   }
-  confirmedstatus()
+  if(document.getElementById('input').value != ''){
+    confirmedstatus()
+  }
   let getNetwork = nodeInfo.features.indexOf('testnet')
   if(getNetwork != -1){
     network = 'Devnet'
@@ -497,8 +499,8 @@ async function isConfirmed(tails){
 
 async function confirmedstatus(){
   let txhash = document.getElementById('input').value
-  if(typeof txhash != 'undefined'){
-  tails = await getTailTxs(txhash)
+  if(typeof txhash != 'undefined' && txhash.trim().length == 81){
+  tails = await getTailTxs(txhash.trim())
   .catch(err=>console.log(err))
   if(tails.length == 1 && tails[0] == '9'.repeat(81)){
     console.log("Tx not known")
@@ -561,7 +563,7 @@ async function send(txhash, amount) {
 async function promote(){
   let amount = 6
   let txhash = document.getElementById('input').value
-  tails  = await getTailTxs(txhash)
+  tails  = await getTailTxs(txhash.trim())
   .catch(err=>console.log(err))
   var tips, attachedTrytes
   txhash = tails[0]
@@ -590,7 +592,7 @@ async function promote(){
 
 async function reattach() {
   let txhash  = document.getElementById('input').value
-  tails   = await getTailTxs(txhash)
+  tails   = await getTailTxs(txhash.trim())
   let message = converter.asciiToTrytes('Reattached by https://thoralf-m.github.io/Promoter')
   // let tag     = 'PROMOTETRANSACTION9THORALF'
   let nonce   = 'THORALF9PROMOTER9BY9THORALF'
