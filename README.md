@@ -1,4 +1,3 @@
-# Promoter
-Iota Promoter/Reattacher
+# IOTA Reattacher/Promoter
 
 https://thoralf-m.github.io/Promoter
