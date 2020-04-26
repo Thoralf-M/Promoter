@@ -16,7 +16,7 @@
   <textarea class="input" id="input" spellcheck="false" placeholder="Transaction-/Bundlehash"></textarea>
 </div>
 <div class="second">
-  <input type="button" class="button reattach" value="Reattach and promote" onclick="reattach()" />
+  <input type="button" class="button reattach" value="Reattach and promote" onclick="reattachAndPromote()" />
 </div>
 <div id="selectedNode">Selected node: </div>
 <div id="third">
@@ -26,11 +26,11 @@
   <input list="nodes" id="nodearea" spellcheck="false" onchange="changeNode()" placeholder="https://nodes.thetangle.org:443"></textarea>
   <datalist id="nodes">
     <option value="https://nodes.thetangle.org:443">
-    <option value="https://node01.iotatoken.nl:443">
+    <option value="https://www.iotaqubic.us:443">
+    <option value="https://pow.iota.community:443">
     <option value="https://perma.iota.partners">
-    <option value="https://community.tanglebay.org">
+    <option value="https://nodes.tanglebay.org">
     <option value="https://nodes.comnet.thetangle.org:443">
-    <option value="https://nodes.devnet.thetangle.org:443">
     <option value="https://nodes.devnet.iota.org:443">
   </datalist>
   <input type="button" class="button2 pow" id="pow" value="Use local PoW" onclick="localPoW()" />
@@ -176,7 +176,7 @@ async function getTailTxs(txhash){
 }
 
 async function isConfirmed(tails){
-  iota.getLatestInclusion(tails)
+  await iota.getLatestInclusion(tails)
     .then(states => {
       if (states.indexOf(true) === -1) {
         console.log('Unconfirmed')
@@ -202,19 +202,23 @@ async function confirmedstatus(){
       if(confirmed == true){
         return
       }
-      isConfirmed(tails)
-      await new Promise(resolve => setTimeout(resolve, 5000))
+      await isConfirmed(tails)
+      await new Promise(resolve => setTimeout(resolve, 10000))
     }
   }
   }
 }
 
-async function send(txhash, amount) {
+async function sendPromoteTxs(txhash, amount, switchTipsel) {
     if (confirmed == true) {
       return
     }
     try {
       let trytes = await iota.prepareTransfers('9'.repeat(81), transfers)
+      //switch to gtta for last promote txs
+      if(typeof switchTipsel != 'undefined' && amount == 2){
+        ignoreTipselection = false
+      }
       if (ignoreTipselection == false) {
         if (amount % 2 == 0) {
           tips = await iota.getTransactionsToApprove(3)
@@ -243,7 +247,7 @@ async function send(txhash, amount) {
         document.getElementById('status').innerHTML = 'Wait for new milestones'
       }
       if (amount > 0) {
-        send(txhash, amount)
+        sendPromoteTxs(txhash, amount, switchTipsel)
       }
     } catch (e) {
       console.log(e)
@@ -257,7 +261,7 @@ async function promote(){
   .catch(err=>console.log(err))
   var tips, attachedTrytes
   txhash = tails[0]
-  send(txhash, amount)
+  sendPromoteTxs(txhash, amount)
 }
 
 async function reattachWithoutConfirmationCheck() {
@@ -270,13 +274,13 @@ async function reattachWithoutConfirmationCheck() {
       console.log(replayhash)
       addtxelement(replayhash)
       document.getElementById('input').value = replayhash
-      send(replayhash, 4)
+      sendPromoteTxs(replayhash, 4)
       return replayedBundle
     })
     .catch(err => console.log(err))
 }
 
-async function reattach() {
+async function reattachAndPromote() {
   try{
   let txhash  = document.getElementById('input').value
   tails   = await getTailTxs(txhash.trim())
@@ -321,7 +325,7 @@ async function reattach() {
       } else {
       console.log('Reattached transaction: https://comnet.thetangle.org/transaction/'+replayhash)
       }
-  send(replayhash, 3)
+  sendPromoteTxs(replayhash, 6, true)
   }catch(e){
     document.getElementById('status').innerHTML = e.message
     console.error(e)
