@@ -325,7 +325,7 @@ async function reattachAndPromote() {
       } else {
       console.log('Reattached transaction: https://comnet.thetangle.org/transaction/'+replayhash)
       }
-  sendPromoteTxs(replayhash, 6, true)
+  sendPromoteTxs(replayhash, 10, true)
   }catch(e){
     document.getElementById('status').innerHTML = e.message
     console.error(e)
