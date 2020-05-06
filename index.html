@@ -180,7 +180,6 @@ async function isConfirmed(tails){
       if (states.indexOf(true) === -1) {
         confirmed = false
         console.log('Unconfirmed')
-        console.log(document.getElementById('status').innerHTML);
         if(document.getElementById('status').innerHTML == 'Bundle is confirmed!' || document.getElementById('status').innerHTML == 'Transactions:'){
          document.getElementById('status').innerHTML = 'Unconfirmed'
         }
