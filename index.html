@@ -179,6 +179,7 @@ async function isConfirmed(tails){
   await iota.getLatestInclusion(tails)
     .then(states => {
       if (states.indexOf(true) === -1) {
+        confirmed = false
         console.log('Unconfirmed')
       } else {
         confirmed = true
@@ -197,6 +198,7 @@ async function confirmedstatus(){
   .catch(err=>console.log(err))
   if(tails.length == 1 && tails[0] == '9'.repeat(81)){
     console.log("Tx not known")
+    confirmed == false
   } else {
     for(let c=0; c<1000; c++){
       if(confirmed == true){
