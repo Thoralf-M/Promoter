@@ -201,6 +201,12 @@ async function confirmedstatus(){
     confirmed == false
   } else {
     for(let c=0; c<1000; c++){
+        if(c%7==0){
+        //get tails again in case someone else reattached it
+        try{
+          tails = await getTailTxs(txhash.trim())
+        }catch(e){console.log(e)}
+      }
       if(confirmed == true){
         return
       }
