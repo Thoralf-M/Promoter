@@ -181,10 +181,13 @@ async function isConfirmed(tails){
       if (states.indexOf(true) === -1) {
         confirmed = false
         console.log('Unconfirmed')
+        if(document.getElementById('status').innerHTML == 'Bundle is confirmed!'){
+         document.getElementById('status').innerHTML = 'Unconfirmed'
+        }
       } else {
         confirmed = true
         console.log('Confirmed')
-        document.getElementById('status').innerHTML = 'Tx is confirmed!'
+        document.getElementById('status').innerHTML = 'Bundle is confirmed!'
         alert("Confirmed")
       }
     })
@@ -200,6 +203,7 @@ async function confirmedstatus(){
     console.log("Tx not known")
     confirmed == false
   } else {
+    await isConfirmed(tails)
     for(let c=0; c<1000; c++){
         if(c%7==0){
         //get tails again in case someone else reattached it
@@ -235,12 +239,7 @@ async function sendPromoteTxs(txhash, amount, switchTipsel) {
           attachedTrytes = await iota.attachToTangle(txhash, tips.trunkTransaction, mwm, trytes)
         }
       } else {
-        let nodeInfo
-        await iota.getNodeInfo()
-          .then(info => nodeInfo = info)
-          .catch(error => {
-            console.log(`Request error: ${error.message}`)
-          })
+        let nodeInfo = await iota.getNodeInfo()
         attachedTrytes = await iota.attachToTangle(txhash, nodeInfo.latestMilestone, mwm, trytes)
       }
       await iota.storeAndBroadcast(attachedTrytes)
@@ -273,19 +272,39 @@ async function promote(){
 }
 
 async function reattachWithoutConfirmationCheck() {
-  let txhash = document.getElementById('input').value
-  let tails  = await getTailTxs(txhash)
-  .catch(err=>console.log(err))
-  iota.replayBundle(tails[0], 3, mwm)
-    .then(replayedBundle => {
-      let replayhash = replayedBundle[0].hash
-      console.log(replayhash)
+  let txhash = document.getElementById('input').value.trim()
+  let bundleTrytes = await getBundle(txhash)
+  let nodeInfo = await iota.getNodeInfo()
+    attachedTrytes = await iota.attachToTangle(nodeInfo.latestMilestone, nodeInfo.latestMilestone, mwm, bundleTrytes.reverse())
+                     await iota.storeAndBroadcast(attachedTrytes)
+  let replayhash = transaction_converter.asTransactionObject(attachedTrytes[0]).hash
+  tails.push(replayhash)
       addtxelement(replayhash)
       document.getElementById('input').value = replayhash
-      sendPromoteTxs(replayhash, 4)
-      return replayedBundle
-    })
-    .catch(err => console.log(err))
+      if(network == 'Mainnet'){
+      console.log('Reattached transaction: https://thetangle.org/transaction/'+replayhash)
+      } else {
+      console.log('Reattached transaction: https://comnet.thetangle.org/transaction/'+replayhash)
+      }
+  sendPromoteTxs(replayhash, 10, true)
+}
+
+function getBundle(tail) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let txHash = tail
+      let bundleObjects = []
+      let bundlesize = 2
+      for (let i = 0; i < bundlesize+1; i++) {
+        let txObj = await iota.getTransactionObjects([txHash])
+        bundlesize = txObj[0].lastIndex
+        bundleObjects.push(txObj[0])
+        txHash = txObj[0].trunkTransaction
+      }
+      let bundle = bundleObjects.map(txObj => transaction_converter.asTransactionTrytes(txObj))
+      resolve(bundle)
+    } catch (err) { reject(err) }
+  });
 }
 
 async function reattachAndPromote() {
@@ -315,12 +334,7 @@ async function reattachAndPromote() {
     let tips       = await iota.getTransactionsToApprove(3)
     attachedTrytes = await iota.attachToTangle(tips.trunkTransaction, tips.branchTransaction, mwm, changedbundle)
   } else {
-    let nodeInfo
-        await iota.getNodeInfo()
-          .then(info => nodeInfo = info)
-          .catch(error => {
-            console.log(`Request error: ${error.message}`)
-          })
+    let nodeInfo = await iota.getNodeInfo()
     attachedTrytes = await iota.attachToTangle(nodeInfo.latestMilestone, nodeInfo.latestMilestone, mwm, changedbundle)
   }
                      await iota.storeAndBroadcast(attachedTrytes)
