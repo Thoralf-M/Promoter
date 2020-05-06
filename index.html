@@ -43,8 +43,7 @@
   </div>
   </div>
 </div>
-<div id="status">Transactions:
-</div>
+<div id="status">Transactions:</div>
 <div id="fourth">
 </div>
 <input type="button" class="button3" id="clear" value="Clear txs" onclick="clearTxs()" /> 
@@ -181,7 +180,8 @@ async function isConfirmed(tails){
       if (states.indexOf(true) === -1) {
         confirmed = false
         console.log('Unconfirmed')
-        if(document.getElementById('status').innerHTML == 'Bundle is confirmed!'){
+        console.log(document.getElementById('status').innerHTML);
+        if(document.getElementById('status').innerHTML == 'Bundle is confirmed!' || document.getElementById('status').innerHTML == 'Transactions:'){
          document.getElementById('status').innerHTML = 'Unconfirmed'
         }
       } else {
