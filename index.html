@@ -347,6 +347,8 @@ async function reattachAndPromote() {
       console.log('Reattached transaction: https://comnet.thetangle.org/transaction/'+replayhash)
       }
   sendPromoteTxs(replayhash, 10, true)
+  //reattach automatically again after 4 minutes
+  setTimeout(function(){ reattachAndPromote() }, 240000);
   }catch(e){
     document.getElementById('status').innerHTML = e.message
     console.error(e)
