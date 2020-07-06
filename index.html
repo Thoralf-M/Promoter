@@ -263,7 +263,7 @@ async function sendPromoteTxs(txhash, amount, switchTipsel) {
   }
 
 async function promote(){
-  let amount = 6
+  let amount = 20
   let txhash = document.getElementById('input').value
   tails  = await getTailTxs(txhash.trim())
   .catch(err=>console.log(err))
@@ -287,7 +287,7 @@ async function reattachWithoutConfirmationCheck() {
       } else {
       console.log('Reattached transaction: https://comnet.thetangle.org/transaction/'+replayhash)
       }
-  sendPromoteTxs(replayhash, 10, true)
+  sendPromoteTxs(replayhash, 25, true)
 }
 
 function getBundle(tail) {
