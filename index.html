@@ -23,7 +23,7 @@
   <input type="button" class="button2 nodebuton advanced" value="Advanced options" onclick="advancedoptions()" />
   <div id="thirdoptions">
     <div id="thirdoptionsone">
-  <input list="nodes" id="nodearea" spellcheck="false" onchange="changeNode()" placeholder="https://node01.iotatoken.nl:443"></textarea>
+  <input list="nodes" id="nodearea" spellcheck="false" onchange="changeNode()" placeholder="https://node03.iotatoken.nl:443"></textarea>
   <datalist id="nodes">
     <option value="https://nodes.thetangle.org:443">
     <option value="https://node01.iotatoken.nl:443">
@@ -31,7 +31,6 @@
     <option value="https://www.iotaqubic.us:443">
     <option value="https://pow.iota.community:443">
     <option value="https://perma.iota.partners">
-    <option value="https://nodes.tanglebay.org">
     <option value="https://nodes.comnet.thetangle.org:443">
     <option value="https://nodes.devnet.iota.org:443">
   </datalist>
@@ -372,7 +371,7 @@ function bundle(tailhash) {
 
 document.getElementById('input').oninput = function(){confirmedstatus()}
 
-var node = 'https://node01.iotatoken.nl:443'
+var node = 'https://node03.iotatoken.nl:443'
 document.getElementById("selectedNode").innerHTML = "Selected node: "+ node
 var iota = core.composeAPI({
   provider: node
