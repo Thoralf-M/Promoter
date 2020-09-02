@@ -1,5 +1,6 @@
 <!doctype html>
 <html>
+
 <head>
   <meta charset="utf-8">
   <title>Reattacher</title>
@@ -7,383 +8,388 @@
   <link href="https://fonts.googleapis.com/css?family=Nunito+Sans:300" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-<div id="content">
-<header><span class="title"><span>Reattacher</span></span></header>
-<main id="content-main">
+  <div id="content">
+    <header><span class="title"><span>Reattacher</span></span></header>
+    <main id="content-main">
 
-<div class="first">
-  <textarea class="input" id="input" spellcheck="false" placeholder="Transaction-/Bundlehash"></textarea>
-</div>
-<div class="second">
-  <input type="button" class="button reattach" value="Reattach and promote" onclick="reattachAndPromote()" />
-</div>
-<div id="selectedNode">Selected node: </div>
-<div id="third">
-  <input type="button" class="button2 nodebuton advanced" value="Advanced options" onclick="advancedoptions()" />
-  <div id="thirdoptions">
-    <div id="thirdoptionsone">
-  <input list="nodes" id="nodearea" spellcheck="false" onchange="changeNode()" placeholder="https://node03.iotatoken.nl:443"></textarea>
-  <datalist id="nodes">
-    <option value="https://nodes.thetangle.org:443">
-    <option value="https://node01.iotatoken.nl:443">
-    <option value="https://node03.iotatoken.nl:443">
-    <option value="https://www.iotaqubic.us:443">
-    <option value="https://pow.iota.community:443">
-    <option value="https://perma.iota.partners">
-    <option value="https://nodes.comnet.thetangle.org:443">
-    <option value="https://nodes.devnet.iota.org:443">
-  </datalist>
-  <input type="button" class="button2 pow" id="pow" value="Use local PoW" onclick="localPoW()" />
-  <input type="button" class="button2" id="tipsel" value="Use tipselection" onclick="changeTipselection()" />
-</div>
-  <div>
-    <input type="button" class="button promote" value="Promote" onclick="promote()" />
-  </div><div>
-    <input type="button" class="button reattach" value="Reattach without confirmation check" onclick="reattachWithoutConfirmationCheck()" />
+      <div class="first">
+        <textarea class="input" id="input" spellcheck="false" placeholder="Transaction-/Bundlehash"></textarea>
+      </div>
+      <div class="second">
+        <input type="button" class="button reattach" value="Reattach and promote" onclick="reattachAndPromote()" />
+      </div>
+      <div id="selectedNode">Selected node: </div>
+      <div id="third">
+        <input type="button" class="button2 nodebuton advanced" value="Advanced options" onclick="advancedoptions()" />
+        <div id="thirdoptions">
+          <div id="thirdoptionsone">
+            <input list="nodes" id="nodearea" spellcheck="false" onchange="changeNode()"
+              placeholder="https://node03.iotatoken.nl:443"></textarea>
+            <datalist id="nodes">
+              <option value="https://nodes.thetangle.org:443">
+              <option value="https://node01.iotatoken.nl:443">
+              <option value="https://node03.iotatoken.nl:443">
+              <option value="https://www.iotaqubic.us:443">
+              <option value="https://pow.iota.community:443">
+              <option value="https://perma.iota.partners">
+              <option value="https://nodes.comnet.thetangle.org:443">
+              <option value="https://nodes.devnet.iota.org:443">
+            </datalist>
+            <input type="button" class="button2 pow" id="pow" value="Use local PoW" onclick="localPoW()" />
+            <input type="button" class="button2" id="tipsel" value="Use tipselection" onclick="changeTipselection()" />
+          </div>
+          <div>
+            <input type="button" class="button promote" value="Promote" onclick="promote()" />
+          </div>
+          <div>
+            <input type="button" class="button reattach" value="Reattach without confirmation check"
+              onclick="reattachWithoutConfirmationCheck()" />
+          </div>
+        </div>
+      </div>
+      <div id="status">Transactions:</div>
+      <div id="fourth">
+      </div>
+      <input type="button" class="button3" id="clear" value="Clear txs" onclick="clearTxs()" />
+
+    </main>
+    <footer>Made by Thoralf
+      </br>
+      <span>Donate: QKCRNPTKVMIPLQKZBAIPYRHTPFZKABAVGEZKANDHQGGTUYKGNAQASZPMIMJSTYTRUJNYVRINZAQNMBZDZGPRAMLNHW</span>
+    </footer>
   </div>
-  </div>
-</div>
-<div id="status">Transactions:</div>
-<div id="fourth">
-</div>
-<input type="button" class="button3" id="clear" value="Clear txs" onclick="clearTxs()" /> 
-
-</main>
-<footer>Made by Thoralf
-</br>
-  <span>Donate: QKCRNPTKVMIPLQKZBAIPYRHTPFZKABAVGEZKANDHQGGTUYKGNAQASZPMIMJSTYTRUJNYVRINZAQNMBZDZGPRAMLNHW</span>
-</footer>
-</div>
-<script>
-function advancedoptions(){
-  let e = document.getElementById('thirdoptions')
-  let style = getComputedStyle(e)
-  if(style.visibility=='hidden'){
-    e.style.visibility='visible';
-    e.style.display='inline-flex'
-  } else {
-    e.style.visibility='hidden';
-    e.style.display='none'
-  }
-}
-
-function clearTxs(){
-  document.getElementById('fourth').innerHTML = ''
-}
-
-function changeTipselection(){
-  ignoreTipselection=!ignoreTipselection
-  let el = document.getElementById('tipsel')
-  if(ignoreTipselection == true){
-    el.value = 'Use tipselection'
-  } else {
-    el.value = 'Ignore tipselection'
-  }
-}
-
-function addtxelement(txhash) {
-  var txelement = document.createElement("tx");
-  if(network == 'Mainnet'){
-    txelement.innerHTML = '<a href="https://thetangle.org/transaction/' + txhash + '" target="_blank" rel="noopener noreferrer">' + '<div class="fill-div">'+ txhash + "</div>"
-  }else{
-    txelement.innerHTML = '<a href="https://comnet.thetangle.org/transaction/' + txhash + '" target="_blank" rel="noopener noreferrer">' + '<div class="fill-div">'+ txhash + "</div>"
-  }
-  document.getElementById("fourth").append(txelement);
-}
-
-function localPoW(){
-  let powbutton = document.getElementById('pow')
-  if(powbutton.value=='Use local PoW'){
-    var curl = window.curl;
-    var minWeight = mwm;
-    try {
-      curl.init();
-      curl.overrideAttachToTangle(iota)
-      powbutton.value = 'Use remote PoW'
-    } catch (err) {
-      console.error("Error", err);
+  <script>
+    function advancedoptions() {
+      let e = document.getElementById('thirdoptions')
+      let style = getComputedStyle(e)
+      if (style.visibility == 'hidden') {
+        e.style.visibility = 'visible';
+        e.style.display = 'inline-flex'
+      } else {
+        e.style.visibility = 'hidden';
+        e.style.display = 'none'
+      }
     }
-  } else {
-    document.getElementById('nodearea').value = node
-    changeNode()
-    powbutton.value = 'Use local PoW'
-  }
-}
 
-async function changeNode(){
-  try{
-  let nodeurl = document.getElementById('nodearea').value
-  let oldNode = node
-  if(nodeurl!='undefined'){
-    node = nodeurl
-  }
-  iota = core.composeAPI({
-    provider: node
-  })
-  let nodeInfo = await iota.getNodeInfo().catch(e=>{
-    node = oldNode
-    console.error("Error changing node, switchting back to ", node)
-    iota = core.composeAPI({
-    provider: node
-  })
-  })
-  if(typeof nodeInfo != 'undefined'){
-    console.log("Nodeinfo new node:", nodeInfo)
-    if(nodeInfo.features.indexOf("testnet")!=-1){
-      mwm = 10
-    } else {
-      mwm = 14
+    function clearTxs() {
+      document.getElementById('fourth').innerHTML = ''
     }
-    document.getElementById("selectedNode").innerHTML = "Selected node: "+ node
-  }
-  if(document.getElementById('input').value != ''){
-    confirmedstatus()
-  }
-  let getNetwork = nodeInfo.features.indexOf('testnet')
-  if(getNetwork != -1){
-    network = 'Testnet'
-  } else {
-    network = 'Mainnet'
-  }
-  } catch(e){
-  }
-}
 
-async function getTailTxs(txhash){
-  let txObject = []
-  if(txhash.slice(78, 81)=='999'){  
-    txObject = await iota.getTransactionObjects([txhash])
-    .catch(err=>console.log(err))
-  } else {
-    txObject[0] = {bundle:txhash}
-  }
-  let bundleObjects = await iota.findTransactionObjects({ bundles: [txObject[0].bundle] })
-  .catch(err=>console.log(err))
-  let tailobjects = []
-  let tails = []
-  for(let index = 0; index < bundleObjects.length; index++){
-    if(bundleObjects[index].currentIndex == 0){
-      tailobjects.push(bundleObjects[index])
+    function changeTipselection() {
+      ignoreTipselection = !ignoreTipselection
+      let el = document.getElementById('tipsel')
+      if (ignoreTipselection == true) {
+        el.value = 'Use tipselection'
+      } else {
+        el.value = 'Ignore tipselection'
+      }
     }
-  }
-  tailobjects.sort((a, b) => (a.attachmentTimestamp < b.attachmentTimestamp) ? 1 : -1)
-  tails = tailobjects.map(e => e.hash)
-  if(tails[0] != '9'.repeat(81)){
-    console.log("Tail txs:",tails);
-  }
-  return tails
-}
 
-async function isConfirmed(tails){
-  await iota.getLatestInclusion(tails)
-    .then(states => {
-      if (states.indexOf(true) === -1) {
-        confirmed = false
-        console.log('Unconfirmed')
-        if(document.getElementById('status').innerHTML == 'Bundle is confirmed!' || document.getElementById('status').innerHTML == 'Transactions:'){
-         document.getElementById('status').innerHTML = 'Unconfirmed'
+    function addtxelement(txhash) {
+      var txelement = document.createElement("tx");
+      if (network == 'Mainnet') {
+        txelement.innerHTML = '<a href="https://thetangle.org/transaction/' + txhash + '" target="_blank" rel="noopener noreferrer">' + '<div class="fill-div">' + txhash + "</div>"
+      } else {
+        txelement.innerHTML = '<a href="https://comnet.thetangle.org/transaction/' + txhash + '" target="_blank" rel="noopener noreferrer">' + '<div class="fill-div">' + txhash + "</div>"
+      }
+      document.getElementById("fourth").append(txelement);
+    }
+
+    function localPoW() {
+      let powbutton = document.getElementById('pow')
+      if (powbutton.value == 'Use local PoW') {
+        var curl = window.curl;
+        var minWeight = mwm;
+        try {
+          curl.init();
+          curl.overrideAttachToTangle(iota)
+          powbutton.value = 'Use remote PoW'
+        } catch (err) {
+          console.error("Error", err);
         }
       } else {
-        confirmed = true
-        console.log('Confirmed')
-        document.getElementById('status').innerHTML = 'Bundle is confirmed!'
-        alert("Confirmed")
+        document.getElementById('nodearea').value = node
+        changeNode()
+        powbutton.value = 'Use local PoW'
       }
-    })
-    .catch(err => console.log(err))
-}
+    }
 
-async function confirmedstatus(){
-  let txhash = document.getElementById('input').value
-  if(typeof txhash != 'undefined' && txhash.trim().length == 81){
-  tails = await getTailTxs(txhash.trim())
-  .catch(err=>console.log(err))
-  if(tails.length == 1 && tails[0] == '9'.repeat(81)){
-    console.log("Tx not known")
-    confirmed == false
-  } else {
-    await isConfirmed(tails)
-    for(let c=0; c<1000; c++){
-        if(c%7==0){
-        //get tails again in case someone else reattached it
-        try{
-          tails = await getTailTxs(txhash.trim())
-        }catch(e){console.log(e)}
+    async function changeNode() {
+      try {
+        let nodeurl = document.getElementById('nodearea').value
+        let oldNode = node
+        if (nodeurl != 'undefined') {
+          node = nodeurl
+        }
+        iota = core.composeAPI({
+          provider: node
+        })
+        let nodeInfo = await iota.getNodeInfo().catch(e => {
+          node = oldNode
+          console.error("Error changing node, switchting back to ", node)
+          iota = core.composeAPI({
+            provider: node
+          })
+        })
+        if (typeof nodeInfo != 'undefined') {
+          console.log("Nodeinfo new node:", nodeInfo)
+          if (nodeInfo.features.indexOf("testnet") != -1) {
+            mwm = 10
+          } else {
+            mwm = 14
+          }
+          document.getElementById("selectedNode").innerHTML = "Selected node: " + node
+        }
+        if (document.getElementById('input').value != '') {
+          confirmedstatus()
+        }
+        let getNetwork = nodeInfo.features.indexOf('testnet')
+        if (getNetwork != -1) {
+          network = 'Testnet'
+        } else {
+          network = 'Mainnet'
+        }
+      } catch (e) {
       }
-      if(confirmed == true){
+    }
+
+    async function getTailTxs(txhash) {
+      let txObject = []
+      if (txhash.slice(78, 81) == '999') {
+        txObject = await iota.getTransactionObjects([txhash])
+          .catch(err => console.log(err))
+      } else {
+        txObject[0] = { bundle: txhash }
+      }
+      let bundleObjects = await iota.findTransactionObjects({ bundles: [txObject[0].bundle] })
+        .catch(err => console.log(err))
+      let tailobjects = []
+      let tails = []
+      for (let index = 0; index < bundleObjects.length; index++) {
+        if (bundleObjects[index].currentIndex == 0) {
+          tailobjects.push(bundleObjects[index])
+        }
+      }
+      tailobjects.sort((a, b) => (a.attachmentTimestamp < b.attachmentTimestamp) ? 1 : -1)
+      tails = tailobjects.map(e => e.hash)
+      if (tails[0] != '9'.repeat(81)) {
+        console.log("Tail txs:", tails);
+      }
+      return tails
+    }
+
+    async function isConfirmed(tails) {
+      await iota.getLatestInclusion(tails)
+        .then(states => {
+          if (states.indexOf(true) === -1) {
+            confirmed = false
+            console.log('Unconfirmed')
+            if (document.getElementById('status').innerHTML == 'Bundle is confirmed!' || document.getElementById('status').innerHTML == 'Transactions:') {
+              document.getElementById('status').innerHTML = 'Unconfirmed'
+            }
+          } else {
+            confirmed = true
+            console.log('Confirmed')
+            document.getElementById('status').innerHTML = 'Bundle is confirmed!'
+            alert("Confirmed")
+          }
+        })
+        .catch(err => console.log(err))
+    }
+
+    async function confirmedstatus() {
+      let txhash = document.getElementById('input').value
+      if (typeof txhash != 'undefined' && txhash.trim().length == 81) {
+        tails = await getTailTxs(txhash.trim())
+          .catch(err => console.log(err))
+        if (tails.length == 1 && tails[0] == '9'.repeat(81)) {
+          console.log("Tx not known")
+          confirmed == false
+        } else {
+          await isConfirmed(tails)
+          for (let c = 0; c < 1000; c++) {
+            if (c % 7 == 0) {
+              //get tails again in case someone else reattached it
+              try {
+                tails = await getTailTxs(txhash.trim())
+              } catch (e) { console.log(e) }
+            }
+            if (confirmed == true) {
+              return
+            }
+            await isConfirmed(tails)
+            await new Promise(resolve => setTimeout(resolve, 10000))
+          }
+        }
+      }
+    }
+
+    async function sendPromoteTxs(txhash, amount, switchTipsel) {
+      if (confirmed == true) {
         return
       }
-      await isConfirmed(tails)
-      await new Promise(resolve => setTimeout(resolve, 10000))
-    }
-  }
-  }
-}
-
-async function sendPromoteTxs(txhash, amount, switchTipsel) {
-    if (confirmed == true) {
-      return
-    }
-    try {
-      let trytes = await iota.prepareTransfers('9'.repeat(81), transfers)
-      //switch to gtta for last promote txs
-      if(typeof switchTipsel != 'undefined' && amount == 2){
-        ignoreTipselection = false
-      }
-      if (ignoreTipselection == false) {
-        if (amount % 2 == 0) {
-          tips = await iota.getTransactionsToApprove(3)
-          attachedTrytes = await iota.attachToTangle(txhash, tips.branchTransaction, mwm, trytes)
-        } else {
-          attachedTrytes = await iota.attachToTangle(txhash, tips.trunkTransaction, mwm, trytes)
+      try {
+        let trytes = await iota.prepareTransfers('9'.repeat(81), transfers)
+        //switch to gtta for last promote txs
+        if (typeof switchTipsel != 'undefined' && amount == 2) {
+          ignoreTipselection = false
         }
-      } else {
-        let nodeInfo = await iota.getNodeInfo()
-        attachedTrytes = await iota.attachToTangle(txhash, nodeInfo.latestMilestone, mwm, trytes)
+        if (ignoreTipselection == false) {
+          if (amount % 2 == 0) {
+            tips = await iota.getTransactionsToApprove(3)
+            attachedTrytes = await iota.attachToTangle(txhash, tips.branchTransaction, mwm, trytes)
+          } else {
+            attachedTrytes = await iota.attachToTangle(txhash, tips.trunkTransaction, mwm, trytes)
+          }
+        } else {
+          let nodeInfo = await iota.getNodeInfo()
+          attachedTrytes = await iota.attachToTangle(txhash, nodeInfo.latestMilestone, mwm, trytes)
+        }
+        await iota.storeAndBroadcast(attachedTrytes)
+        if (network == 'Mainnet') {
+          console.log('Promotetransaction: https://thetangle.org/transaction/' + transaction_converter.asTransactionObject(attachedTrytes[0]).hash)
+        } else {
+          console.log('Promotetransaction: https://comnet.thetangle.org/transaction/' + transaction_converter.asTransactionObject(attachedTrytes[0]).hash)
+        }
+        addtxelement(transaction_converter.asTransactionObject(attachedTrytes[0]).hash)
+        amount--
+        if (amount == 0) {
+          document.getElementById('status').innerHTML = 'Wait for new milestones'
+        }
+        if (amount > 0) {
+          sendPromoteTxs(txhash, amount, switchTipsel)
+        }
+      } catch (e) {
+        console.log(e)
       }
-      await iota.storeAndBroadcast(attachedTrytes)
-      if(network == 'Mainnet'){
-      console.log('Promotetransaction: https://thetangle.org/transaction/' + transaction_converter.asTransactionObject(attachedTrytes[0]).hash)
-      } else {
-      console.log('Promotetransaction: https://comnet.thetangle.org/transaction/' + transaction_converter.asTransactionObject(attachedTrytes[0]).hash)
-      }
-      addtxelement(transaction_converter.asTransactionObject(attachedTrytes[0]).hash)
-      amount--
-      if(amount == 0){
-        document.getElementById('status').innerHTML = 'Wait for new milestones'
-      }
-      if (amount > 0) {
-        sendPromoteTxs(txhash, amount, switchTipsel)
-      }
-    } catch (e) {
-      console.log(e)
     }
-  }
 
-async function promote(){
-  let amount = 20
-  let txhash = document.getElementById('input').value
-  tails  = await getTailTxs(txhash.trim())
-  .catch(err=>console.log(err))
-  var tips, attachedTrytes
-  txhash = tails[0]
-  sendPromoteTxs(txhash, amount)
-}
+    async function promote() {
+      let amount = 20
+      let txhash = document.getElementById('input').value
+      tails = await getTailTxs(txhash.trim())
+        .catch(err => console.log(err))
+      var tips, attachedTrytes
+      txhash = tails[0]
+      sendPromoteTxs(txhash, amount)
+    }
 
-async function reattachWithoutConfirmationCheck() {
-  let txhash = document.getElementById('input').value.trim()
-  let bundleTrytes = await getBundle(txhash)
-  let nodeInfo = await iota.getNodeInfo()
-    attachedTrytes = await iota.attachToTangle(nodeInfo.latestMilestone, nodeInfo.latestMilestone, mwm, bundleTrytes.reverse())
-                     await iota.storeAndBroadcast(attachedTrytes)
-  let replayhash = transaction_converter.asTransactionObject(attachedTrytes[0]).hash
-  tails.push(replayhash)
+    async function reattachWithoutConfirmationCheck() {
+      let txhash = document.getElementById('input').value.trim()
+      let bundleTrytes = await getBundle(txhash)
+      let nodeInfo = await iota.getNodeInfo()
+      attachedTrytes = await iota.attachToTangle(nodeInfo.latestMilestone, nodeInfo.latestMilestone, mwm, bundleTrytes.reverse())
+      await iota.storeAndBroadcast(attachedTrytes)
+      let replayhash = transaction_converter.asTransactionObject(attachedTrytes[0]).hash
+      tails.push(replayhash)
       addtxelement(replayhash)
       document.getElementById('input').value = replayhash
-      if(network == 'Mainnet'){
-      console.log('Reattached transaction: https://thetangle.org/transaction/'+replayhash)
+      if (network == 'Mainnet') {
+        console.log('Reattached transaction: https://thetangle.org/transaction/' + replayhash)
       } else {
-      console.log('Reattached transaction: https://comnet.thetangle.org/transaction/'+replayhash)
+        console.log('Reattached transaction: https://comnet.thetangle.org/transaction/' + replayhash)
       }
-  sendPromoteTxs(replayhash, 25, true)
-}
+      sendPromoteTxs(replayhash, 25, true)
+    }
 
-function getBundle(tail) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      let txHash = tail
-      let bundleObjects = []
-      let bundlesize = 2
-      for (let i = 0; i < bundlesize+1; i++) {
-        let txObj = await iota.getTransactionObjects([txHash])
-        bundlesize = txObj[0].lastIndex
-        bundleObjects.push(txObj[0])
-        txHash = txObj[0].trunkTransaction
+    function getBundle(tail) {
+      return new Promise(async (resolve, reject) => {
+        try {
+          let txHash = tail
+          let bundleObjects = []
+          let bundlesize = 2
+          for (let i = 0; i < bundlesize + 1; i++) {
+            let txObj = await iota.getTransactionObjects([txHash])
+            bundlesize = txObj[0].lastIndex
+            bundleObjects.push(txObj[0])
+            txHash = txObj[0].trunkTransaction
+          }
+          let bundle = bundleObjects.map(txObj => transaction_converter.asTransactionTrytes(txObj))
+          resolve(bundle)
+        } catch (err) { reject(err) }
+      });
+    }
+
+    async function reattachAndPromote() {
+      try {
+        let txhash = document.getElementById('input').value
+        tails = await getTailTxs(txhash.trim())
+        let message = converter.asciiToTrytes('Reattached with https://thoralf-m.github.io/Promoter')
+        let nonce = 'THORALF9PROMOTER9BY9THORALF'
+        let changedbundle = []
+        let bundletrytes = await bundle(tails[0])
+        //change trytes
+        changedbundle = await bundletrytes.map(element => {
+          element = transaction_converter.asTransactionTrytes(element)
+          nonce = nonce + '9'.repeat(27)
+          nonce = nonce.slice(0, 27)
+          element = element.slice(0, 2646) + nonce
+          return element
+        })
+        changedbundle = changedbundle.reverse()
+
+        if (confirmed == true) {
+          return
+        }
+        document.getElementById('status').innerHTML = 'Sending transactions...'
+        let attachedTrytes
+        if (ignoreTipselection == false) {
+          let tips = await iota.getTransactionsToApprove(3)
+          attachedTrytes = await iota.attachToTangle(tips.trunkTransaction, tips.branchTransaction, mwm, changedbundle)
+        } else {
+          let nodeInfo = await iota.getNodeInfo()
+          attachedTrytes = await iota.attachToTangle(nodeInfo.latestMilestone, nodeInfo.latestMilestone, mwm, changedbundle)
+        }
+        await iota.storeAndBroadcast(attachedTrytes)
+        let replayhash = transaction_converter.asTransactionObject(attachedTrytes[0]).hash
+        tails.push(replayhash)
+        addtxelement(replayhash)
+        document.getElementById('input').value = replayhash
+        if (network == 'Mainnet') {
+          console.log('Reattached transaction: https://thetangle.org/transaction/' + replayhash)
+        } else {
+          console.log('Reattached transaction: https://comnet.thetangle.org/transaction/' + replayhash)
+        }
+        sendPromoteTxs(replayhash, 10, true)
+        //reattach automatically again after 4 minutes
+        setTimeout(function () { reattachAndPromote() }, 240000);
+      } catch (e) {
+        document.getElementById('status').innerHTML = e.message
+        console.error(e)
       }
-      let bundle = bundleObjects.map(txObj => transaction_converter.asTransactionTrytes(txObj))
-      resolve(bundle)
-    } catch (err) { reject(err) }
-  });
-}
+    }
 
-async function reattachAndPromote() {
-  try{
-  let txhash  = document.getElementById('input').value
-  tails   = await getTailTxs(txhash.trim())
-  let message = converter.asciiToTrytes('Reattached with https://thoralf-m.github.io/Promoter')
-  let nonce   = 'THORALF9PROMOTER9BY9THORALF'
-  let changedbundle = []
-  let bundletrytes = await bundle(tails[0])
-  //change trytes
-  changedbundle = await bundletrytes.map(element => {
-    element = transaction_converter.asTransactionTrytes(element)
-    nonce = nonce + '9'.repeat(27)
-    nonce = nonce.slice(0, 27)
-    element = element.slice(0, 2646) + nonce
-    return element
-  })
-  changedbundle = changedbundle.reverse()
+    function bundle(tailhash) {
+      return new Promise((resolve, reject) => {
+        iota.getBundle(tailhash, (err, res) => {
+          if (res) {
+            resolve(res)
+          } else {
+            reject(err)
+          }
+        })
+      })
+    }
 
-  if (confirmed == true) {
-    return
-  }
-  document.getElementById('status').innerHTML = 'Sending transactions...'
-  let attachedTrytes
-  if(ignoreTipselection == false){
-    let tips       = await iota.getTransactionsToApprove(3)
-    attachedTrytes = await iota.attachToTangle(tips.trunkTransaction, tips.branchTransaction, mwm, changedbundle)
-  } else {
-    let nodeInfo = await iota.getNodeInfo()
-    attachedTrytes = await iota.attachToTangle(nodeInfo.latestMilestone, nodeInfo.latestMilestone, mwm, changedbundle)
-  }
-                     await iota.storeAndBroadcast(attachedTrytes)
-  let replayhash = transaction_converter.asTransactionObject(attachedTrytes[0]).hash
-  tails.push(replayhash)
-      addtxelement(replayhash)
-      document.getElementById('input').value = replayhash
-      if(network == 'Mainnet'){
-      console.log('Reattached transaction: https://thetangle.org/transaction/'+replayhash)
-      } else {
-      console.log('Reattached transaction: https://comnet.thetangle.org/transaction/'+replayhash)
-      }
-  sendPromoteTxs(replayhash, 10, true)
-  //reattach automatically again after 4 minutes
-  setTimeout(function(){ reattachAndPromote() }, 240000);
-  }catch(e){
-    document.getElementById('status').innerHTML = e.message
-    console.error(e)
-  }
-}
 
-function bundle(tailhash) {
-  return new Promise((resolve, reject) => {
-    iota.getBundle(tailhash, (err, res) => {
-      if (res) {
-        resolve(res)
-      } else {
-        reject(err)
-      }
+    document.getElementById('input').oninput = function () { confirmedstatus() }
+
+    var node = 'https://iotanode.us:14267'
+    document.getElementById("selectedNode").innerHTML = "Selected node: " + node
+    var iota = core.composeAPI({
+      provider: node
     })
-  })
-}
+    var network = 'Mainnet'
+    var seed = '9'.repeat(81)
+    var transfers = [{ value: 0, address: 'PROMOTETRANSACTION9PROMOTER9BY9THORALF9PROMOTETRANSACTION9PROMOTER9BY9THORALF9999', tag: 'PROMOTETRANSACTION9THORALF', message: converter.asciiToTrytes('https://thoralf-m.github.io/Promoter') }]
+    var confirmed = false
+    var ignoreTipselection = true
+    var tails = []
+    var mwm = 14
 
-
-document.getElementById('input').oninput = function(){confirmedstatus()}
-
-var node = 'https://nodes.thetangle.org:443'
-document.getElementById("selectedNode").innerHTML = "Selected node: "+ node
-var iota = core.composeAPI({
-  provider: node
-})
-var network = 'Mainnet'
-var seed= '9'.repeat(81)
-var transfers = [{value: 0, address: 'PROMOTETRANSACTION9PROMOTER9BY9THORALF9PROMOTETRANSACTION9PROMOTER9BY9THORALF9999', tag:'PROMOTETRANSACTION9THORALF', message: converter.asciiToTrytes('https://thoralf-m.github.io/Promoter')}]
-var confirmed = false
-var ignoreTipselection = true
-var tails = []
-var mwm = 14
-
-</script>
+  </script>
 </body>
+
 </html>
