@@ -294,21 +294,23 @@
     }
 
     async function reattachWithoutConfirmationCheck() {
-      let txhash = document.getElementById('input').value.trim()
-      let bundleTrytes = await getBundle(txhash)
-      let nodeInfo = await iota.getNodeInfo()
-      attachedTrytes = await iota.attachToTangle(nodeInfo.latestMilestone, nodeInfo.latestMilestone, mwm, bundleTrytes.reverse())
-      await iota.storeAndBroadcast(attachedTrytes)
-      let replayhash = transaction_converter.asTransactionObject(attachedTrytes[0]).hash
-      tails.push(replayhash)
-      addtxelement(replayhash)
-      document.getElementById('input').value = replayhash
-      if (network == 'Mainnet') {
-        console.log('Reattached transaction: https://thetangle.org/transaction/' + replayhash)
-      } else {
-        console.log('Reattached transaction: https://comnet.thetangle.org/transaction/' + replayhash)
-      }
-      sendPromoteTxs(replayhash, 25, true)
+      try {
+        let txhash = document.getElementById('input').value.trim()
+        let bundleTrytes = await getBundle(txhash)
+        let nodeInfo = await iota.getNodeInfo()
+        attachedTrytes = await iota.attachToTangle(nodeInfo.latestMilestone, nodeInfo.latestMilestone, mwm, bundleTrytes.reverse())
+        await iota.storeAndBroadcast(attachedTrytes)
+        let replayhash = transaction_converter.asTransactionObject(attachedTrytes[0]).hash
+        tails.push(replayhash)
+        addtxelement(replayhash)
+        document.getElementById('input').value = replayhash
+        if (network == 'Mainnet') {
+          console.log('Reattached transaction: https://thetangle.org/transaction/' + replayhash)
+        } else {
+          console.log('Reattached transaction: https://comnet.thetangle.org/transaction/' + replayhash)
+        }
+        sendPromoteTxs(replayhash, 25, true)
+      } catch (err) { console.log(err) }
     }
 
     function getBundle(tail) {
@@ -319,6 +321,10 @@
           let bundlesize = 2
           for (let i = 0; i < bundlesize + 1; i++) {
             let txObj = await iota.getTransactionObjects([txHash])
+            if (txObj[0].bundle == '9'.repeat(81)) {
+              document.getElementById('status').innerHTML = "Couldn't find the bundle with this hash, try another node"
+              throw "Couldn't find the bundle"
+            }
             bundlesize = txObj[0].lastIndex
             bundleObjects.push(txObj[0])
             txHash = txObj[0].trunkTransaction
