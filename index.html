@@ -22,7 +22,7 @@
       </div>
       <div id="selectedNode">Selected node: </div>
       <div id="third">
-        <input type="button" class="button2 nodebuton advanced" value="Advanced options" onclick="advancedoptions()" />
+        <input type="button" class="button2 nodebuton advanced" value="Advanced settings" onclick="advancedoptions()" />
         <div id="thirdoptions">
           <div id="thirdoptionsone">
             <input list="nodes" id="nodearea" spellcheck="false" onchange="changeNode()"
@@ -31,10 +31,12 @@
               <option value="https://nodes.thetangle.org:443">
               <option value="https://node01.iotatoken.nl:443">
               <option value="https://node03.iotatoken.nl:443">
-              <option value="https://www.iotaqubic.us:443">
+              <option value="https://papa.iota.family:14267">
+              <option value="https://nodes.iota.cafe:443">
+              <option value="https://v22018036012963637.bestsrv.de:14267">
+              <option value="https://hornet.beeiota.host:14265">
               <option value="https://iotanode.us:14267">
               <option value="https://pow.iota.community:443">
-              <option value="https://perma.iota.partners">
               <option value="https://nodes.comnet.thetangle.org:443">
               <option value="https://nodes.devnet.iota.org:443">
             </datalist>
@@ -164,8 +166,14 @@
       } else {
         txObject[0] = { bundle: txhash }
       }
+      if (txObject[0].bundle == '9'.repeat(81)) {
+        throw "Couldn't find transactions with this hash"
+      }
       let bundleObjects = await iota.findTransactionObjects({ bundles: [txObject[0].bundle] })
         .catch(err => console.log(err))
+      if (bundleObjects.length == 0) {
+        throw "Couldn't find transactions with this hash"
+      }
       let tailobjects = []
       let tails = []
       for (let index = 0; index < bundleObjects.length; index++) {
@@ -201,30 +209,38 @@
     }
 
     async function confirmedstatus() {
-      let txhash = document.getElementById('input').value
-      if (typeof txhash != 'undefined' && txhash.trim().length == 81) {
-        tails = await getTailTxs(txhash.trim())
-          .catch(err => console.log(err))
-        if (tails.length == 1 && tails[0] == '9'.repeat(81)) {
-          console.log("Tx not known")
-          confirmed == false
-        } else {
-          await isConfirmed(tails)
-          for (let c = 0; c < 1000; c++) {
-            if (c % 7 == 0) {
-              //get tails again in case someone else reattached it
-              try {
-                tails = await getTailTxs(txhash.trim())
-              } catch (e) { console.log(e) }
-            }
-            if (confirmed == true) {
-              return
-            }
+      try {
+        let txhash = document.getElementById('input').value
+        if (typeof txhash != 'undefined' && txhash.trim().length == 81) {
+          tails = await getTailTxs(txhash.trim())
+            .catch(err => console.log(err))
+          if (typeof tails == 'undefined') {
+            document.getElementById('status').innerHTML = "Couldn't find a transaction with this hash, try another node"
+            console.log("Tx not known")
+            confirmed == false
+            return
+          }
+          if (tails.length == 1 && tails[0] == '9'.repeat(81)) {
+            console.log("Tx not known")
+            confirmed == false
+          } else {
             await isConfirmed(tails)
-            await new Promise(resolve => setTimeout(resolve, 10000))
+            for (let c = 0; c < 1000; c++) {
+              if (c % 7 == 0) {
+                //get tails again in case someone else reattached it
+                try {
+                  tails = await getTailTxs(txhash.trim())
+                } catch (e) { console.log(e) }
+              }
+              if (confirmed == true) {
+                return
+              }
+              await isConfirmed(tails)
+              await new Promise(resolve => setTimeout(resolve, 10000))
+            }
           }
         }
-      }
+      } catch (err) { console.log(err) }
     }
 
     async function sendPromoteTxs(txhash, amount, switchTipsel) {
@@ -239,7 +255,7 @@
         }
         if (ignoreTipselection == false) {
           if (amount % 2 == 0) {
-            tips = await iota.getTransactionsToApprove(3)
+            tips = await iota.getTransactionsToApprove(2)
             attachedTrytes = await iota.attachToTangle(txhash, tips.branchTransaction, mwm, trytes)
           } else {
             attachedTrytes = await iota.attachToTangle(txhash, tips.trunkTransaction, mwm, trytes)
@@ -337,7 +353,7 @@
         document.getElementById('status').innerHTML = 'Sending transactions...'
         let attachedTrytes
         if (ignoreTipselection == false) {
-          let tips = await iota.getTransactionsToApprove(3)
+          let tips = await iota.getTransactionsToApprove(2)
           attachedTrytes = await iota.attachToTangle(tips.trunkTransaction, tips.branchTransaction, mwm, changedbundle)
         } else {
           let nodeInfo = await iota.getNodeInfo()
@@ -362,16 +378,44 @@
       }
     }
 
-    function bundle(tailhash) {
-      return new Promise((resolve, reject) => {
-        iota.getBundle(tailhash, (err, res) => {
-          if (res) {
-            resolve(res)
-          } else {
-            reject(err)
+    async function bundle(tailHash) {
+      try {
+        let txObject = await iota.getTransactionObjects([tailHash])
+        let txs = await iota.findTransactionObjects({ bundles: [txObject[0].bundle] })
+        if (txs.length == 0) {
+          throw "Didn't find any transaction with this bundlehash: " + bundlehash
+        }
+        let bundles = []
+        //get tail txs first
+        for (tx of txs) {
+          if (tx.currentIndex == 0) {
+            bundles.push({ tail: tx.hash, txs: [tx] })
           }
-        })
-      })
+        }
+        for (tailtx of bundles) {
+          let latesttx = tailtx.txs[0]
+          for (let j = 1; j < latesttx.lastIndex + 1; j++) {
+            let nexttxs = txs.filter(tx => tx.hash == latesttx.trunkTransaction)
+            if (nexttxs.length == 0) {
+              console.log("Missing tx");
+              break
+            }
+            latesttx = nexttxs[0]
+            tailtx.txs[j] = nexttxs[0]
+          }
+        }
+        let fullBundles = bundles.filter(bundle => bundle.txs.length == txs[0].lastIndex + 1)
+        if (fullBundles.length == 0) {
+          throw "Couldn't get all transactions"
+        }
+        let validBundles = fullBundles.filter(bundle => bundle_validator.default(bundle.txs))
+        if (validBundles.length == 0) {
+          document.getElementById('status').innerHTML = "Couldn't find a valid bundle with this hash, try another node"
+          throw "Couldn't find a valid bundle with this hash, try another node"
+        }
+        return validBundles[0].txs
+      }
+      catch (err) { console.log(err) }
     }
 
 
