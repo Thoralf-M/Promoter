@@ -26,14 +26,11 @@
         <div id="thirdoptions">
           <div id="thirdoptionsone">
             <input list="nodes" id="nodearea" spellcheck="false" onchange="changeNode()"
-              placeholder="https://node03.iotatoken.nl:443"></textarea>
+              placeholder="https://nodes.thetangle.org:443"></textarea>
             <datalist id="nodes">
               <option value="https://nodes.thetangle.org:443">
-              <option value="https://node01.iotatoken.nl:443">
-              <option value="https://node03.iotatoken.nl:443">
               <option value="https://papa.iota.family:14267">
               <option value="https://nodes.iota.cafe:443">
-              <option value="https://v22018036012963637.bestsrv.de:14267">
               <option value="https://hornet.beeiota.host:14265">
               <option value="https://iotanode.us:14267">
               <option value="https://pow.iota.community:443">
@@ -427,7 +424,7 @@
 
     document.getElementById('input').oninput = function () { confirmedstatus() }
 
-    var node = 'https://node03.iotatoken.nl:443'
+    var node = 'https://nodes.thetangle.org:443'
     document.getElementById("selectedNode").innerHTML = "Selected node: " + node
     var iota = core.composeAPI({
       provider: node
